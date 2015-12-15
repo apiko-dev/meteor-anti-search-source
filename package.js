@@ -8,5 +8,11 @@ Package.describe({
 
 Package.onUse(function (api) {
   api.versionsFrom('METEOR@1.1.0.3');
-  api.addFiles('anti-search-source.js');
+  api.use('templating');
+  api.use('coffeescript');
+  api.use('reactive-var');
+
+  api.addFiles('lib/both.coffee');
+  api.addFiles(['lib/client.coffee'],'client');
+  api.addFiles(['lib/server.coffee'],'server');
 });
