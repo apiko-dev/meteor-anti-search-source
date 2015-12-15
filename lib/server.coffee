@@ -1,11 +1,5 @@
-Meteor.publish @AntiSearchSource._publisherName, (configEntry) ->
-  check configEntry, {
-    collection: String
-    fields: [String]
-    searchString: Match.Optional(String)
-    mongoQuery: Match.Optional(Object)
-    limit: Match.Optional(Number)
-  }
+Meteor.publish AntiSearchSource._publisherName, (configEntry) ->
+  check configEntry, AntiSearchSource._SearchConfig
 
   currentAllowRule = AntiSearchSource._allowRules[configEntry.collection]
   # security check
@@ -13,8 +7,10 @@ Meteor.publish @AntiSearchSource._publisherName, (configEntry) ->
     unless currentAllowRule.call null, @userId, configEntry
       return
 
-  collection = new Mongo.Collection(configEntry.collection)
+  collection = Mongo.Collection.get(configEntry.collection)
 
   searchQuery = AntiSearchSource._buildSearchQuery(configEntry)
 
-  return collection.find searchQuery, {limit: configEntry.limit}
+  cursor = collection.find searchQuery, {limit: configEntry.limit}
+
+  return cursor
