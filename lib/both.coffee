@@ -13,9 +13,14 @@ class AntiSearchSourceClient
 # Changes search string
   search: (searchString) ->
     if searchString or searchString is ''
-      @_stateChanged()
       @_searchConfig.searchString = searchString
+      @_stateChanged()
     @_searchSubscribtion = @_subscriptionContext.subscribe AntiSearchSource._publisherName, @_searchConfig, @_onSubscriptionReady
+
+  setMongoQuery: (newMongoQuery) ->
+    @_searchConfig.mongoQuery = newMongoQuery
+    @_stateChanged()
+    @_search()
 
 # May be used for infinite scroll or something like that
   setLimit: (newLimit) ->
