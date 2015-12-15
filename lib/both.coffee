@@ -57,7 +57,7 @@ class AntiSearchSourceClient
     searchQuery = _.extend {}, configEntry.mongoQuery
 
     if configEntry.searchString
-      escapedSearchString = configEntry.searchString #@_escapeRegExpStr(configEntry.searchString)
+      escapedSearchString = @_escapeRegExpStr(configEntry.searchString)
       searchQuery.$or = []
       configEntry.fields.forEach (fieldName) ->
         $orEntry = {}
