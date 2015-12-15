@@ -12,6 +12,7 @@ Package.onUse(function (api) {
   api.use('coffeescript');
   api.use('check');
   api.use('reactive-var');
+  api.use('underscore');
   api.use('dburles:mongo-collection-instances@0.1.3');
 
   api.addFiles('lib/both.coffee');

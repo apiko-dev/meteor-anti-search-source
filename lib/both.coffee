@@ -31,11 +31,12 @@ class AntiSearchSourceClient
 
 
 # Reactive data source
-  searchResult: ->
+  searchResult: (options) ->
     @_stateFlag.get()
     if @_searchSubscribtion and @_searchSubscribtion.ready()
       query = AntiSearchSource._buildSearchQuery(@_searchConfig)
-      return @_collection.find(query, {limit: @_searchConfig.limit})
+      _.extend options, {limit: @_searchConfig.limit}
+      return @_collection.find(query, options)
 
 # Cancels subscription for search data
   destroy: () -> @_searchSubscribtion.stop()
@@ -44,6 +45,7 @@ class AntiSearchSourceClient
 @AntiSearchSource =
   _publisherName: '__antiSearchSourcePublisher'
   _allowRules: {}
+  _transforms: {}
 
   _clientProto: AntiSearchSourceClient
 
@@ -73,6 +75,9 @@ class AntiSearchSourceClient
 
   allow: (collectionName, allowCallback) ->
     @_allowRules[collectionName] = allowCallback;
+
+  queryTransform: (collectionName, transformCallback) ->
+    @_transforms[collectionName] = transformCallback
 
   create: (config) -> new AntiSearchSourceClient(config)
 
