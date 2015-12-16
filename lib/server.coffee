@@ -12,7 +12,7 @@ Meteor.publish AntiSearchSource._publisherName, (configEntry) ->
   searchQuery = AntiSearchSource._buildSearchQuery(configEntry)
 
   queryTranformFn = AntiSearchSource._transforms[configEntry.collection]
-  if queryTranformFn then searchQuery = queryTranformFn(searchQuery)
+  if queryTranformFn then searchQuery = queryTranformFn(@userId, searchQuery)
 
   cursor = collection.find searchQuery, {limit: configEntry.limit}
   return cursor
