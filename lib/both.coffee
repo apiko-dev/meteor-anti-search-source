@@ -1,6 +1,6 @@
 class AntiSearchSourceClient
   constructor: (@_searchConfig, @_subscriptionContext = Meteor) ->
-    @_searchConfig.limit = @_searchConfig.limit || 21
+    @_searchConfig.limit = @_searchConfig.limit || 0
 
     @_collection = Mongo.Collection.get(@_searchConfig.collection)
     @_stateFlag = new ReactiveVar(false);
@@ -11,6 +11,17 @@ class AntiSearchSourceClient
     if err then console.log('Error while searching', err)
 
   _stateChanged: -> @_stateFlag.set(!@_stateFlag.get())
+
+  _createTransformFn: (usersTransform) ->
+    transformFn = (document) =>
+      searchStr = @_searchConfig.searchString
+      if searchStr
+        searchStrRegExp = new RegExp(searchStr, 'ig')
+        @_searchConfig.fields.forEach (fieldName) =>
+          document[fieldName] = usersTransform(document[fieldName], searchStrRegExp)
+      return document
+
+    if _.isFunction usersTransform then transformFn else null
 
   _updateQuery: ->
     @_stateChanged()
@@ -26,34 +37,29 @@ class AntiSearchSourceClient
       @_searchSubscribtion = @_subscriptionContext.subscribe AntiSearchSource._publisherName, @_searchConfig, @_onSubscriptionReady
 
   setMongoQuery: (newMongoQuery) ->
-    if _.isEqual newMongoQuery, @_searchConfig.mongoQuery
-      return
-    else
+    unless _.isEqual newMongoQuery, @_searchConfig.mongoQuery
       @_searchConfig.mongoQuery = newMongoQuery
-
       @_updateQuery()
 
 # May be used for infinite scroll or something like that
   setLimit: (newLimit) ->
-    if @_searchConfig.limit == newLimit
-      return
-    else
-    @_searchConfig.limit = newLimit
-
-    @_updateQuery()
+    unless @_searchConfig.limit == newLimit
+      @_searchConfig.limit = newLimit
+      @_updateQuery()
 
   incrementLimit: (step = 10) ->
     @_searchConfig.limit += step
-
     @_updateQuery()
-
 
 # Reactive data source
   searchResult: (options = {}) ->
     @_stateFlag.get()
     if @_searchConfig.searchMode is 'local' or @_searchSubscribtion and @_searchSubscribtion.ready()
       query = AntiSearchSource._buildSearchQuery(@_searchConfig)
-      _.extend options, {limit: @_searchConfig.limit}
+      _.extend options,
+        limit: @_searchConfig.limit
+        transform: @_createTransformFn(options.transform)
+
       return @_collection.find(query, options)
 
 # Cancels subscription for search data
@@ -98,5 +104,3 @@ class AntiSearchSourceClient
     @_transforms[collectionName] = transformCallback
 
   create: (config) -> new AntiSearchSourceClient(config)
-
-
