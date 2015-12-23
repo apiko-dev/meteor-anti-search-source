@@ -1,5 +1,7 @@
 class AntiSearchSourceClient
-  constructor: (@_searchConfig, @_subscriptionContext=Meteor) ->
+  constructor: (@_searchConfig, @_subscriptionContext = Meteor) ->
+    @_searchConfig.limit = @_searchConfig.limit || 21
+
     @_collection = Mongo.Collection.get(@_searchConfig.collection)
     @_stateFlag = new ReactiveVar(false);
     #make dummy subscription after creating
@@ -10,30 +12,46 @@ class AntiSearchSourceClient
 
   _stateChanged: -> @_stateFlag.set(!@_stateFlag.get())
 
+  _updateQuery: ->
+    @_stateChanged()
+    @search()
+
 # Changes search string
   search: (searchString) ->
     if searchString or searchString is ''
       @_searchConfig.searchString = searchString
       @_stateChanged()
-    @_searchSubscribtion = @_subscriptionContext.subscribe AntiSearchSource._publisherName, @_searchConfig, @_onSubscriptionReady
+
+    if @_searchConfig.searchMode is 'subscription'
+      @_searchSubscribtion = @_subscriptionContext.subscribe AntiSearchSource._publisherName, @_searchConfig, @_onSubscriptionReady
 
   setMongoQuery: (newMongoQuery) ->
-    @_searchConfig.mongoQuery = newMongoQuery
-    @_stateChanged()
-    @_search()
+    if _.isEqual newMongoQuery, @_searchConfig.mongoQuery
+      return
+    else
+      @_searchConfig.mongoQuery = newMongoQuery
+
+      @_updateQuery()
 
 # May be used for infinite scroll or something like that
   setLimit: (newLimit) ->
+    if @_searchConfig.limit == newLimit
+      return
+    else
     @_searchConfig.limit = newLimit
-    @_stateChanged()
-    # Update subscription
-    @search()
+
+    @_updateQuery()
+
+  incrementLimit: (step = 10) ->
+    @_searchConfig.limit += step
+
+    @_updateQuery()
 
 
 # Reactive data source
-  searchResult: (options) ->
+  searchResult: (options = {}) ->
     @_stateFlag.get()
-    if @_searchSubscribtion and @_searchSubscribtion.ready()
+    if @_searchConfig.searchMode is 'local' or @_searchSubscribtion and @_searchSubscribtion.ready()
       query = AntiSearchSource._buildSearchQuery(@_searchConfig)
       _.extend options, {limit: @_searchConfig.limit}
       return @_collection.find(query, options)
