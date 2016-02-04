@@ -2,7 +2,7 @@ Package.describe({
   name: 'jss:anti-search-source',
   version: '0.2.3',
   summary: 'Flexible search in collections based on publish/subscribe',
-  git: 'git@github.com:JSSolutions/meteor-anti-search-source.git',
+  git: 'https://github.com/JSSolutions/meteor-anti-search-sourc',
   documentation: 'README.md'
 });
 
