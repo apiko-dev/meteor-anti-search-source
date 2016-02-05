@@ -88,15 +88,20 @@ class AntiSearchSourceClient
   _escapeRegExpStr: (str) -> str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
 
   _buildSearchQuery: (configEntry) ->
-    searchQuery = _.extend {}, configEntry.mongoQuery
-
     if configEntry.searchString
       escapedSearchString = @_escapeRegExpStr(configEntry.searchString)
-      searchQuery.$or = []
-      configEntry.fields.forEach (fieldName) ->
+      $searchStringOr = configEntry.fields.map (fieldName) ->
         $orEntry = {}
         $orEntry[fieldName] = {$regex: escapedSearchString, $options: 'i'}
-        searchQuery.$or.push $orEntry
+        return $orEntry
+
+    searchQuery = {
+      $and: [
+        _.extend {}, configEntry.mongoQuery
+      ]
+    }
+
+    if _.isArray $searchStringOr then searchQuery.$and.push {$or: $searchStringOr}
 
     return searchQuery
 
