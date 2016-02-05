@@ -6,14 +6,12 @@ class AntiSearchSourceClient
     @_collection = if _.isString collection then Mongo.Collection.get(collection) else collection
     @_searchConfig.collection = if _.isString collection then collection else collection._name
 
-    @_stateFlag = new ReactiveVar(false);
+    @_searchDep = new Tracker.Dependency();
     #make dummy subscription after creating
     @search('')
 
   _onSubscriptionReady: (err, res) ->
     if err then console.log('Error while searching', err)
-
-  _stateChanged: -> @_stateFlag.set(!@_stateFlag.get())
 
   _createTransformFn: (usersTransform) ->
     transformFn = (document) =>
@@ -27,14 +25,14 @@ class AntiSearchSourceClient
     if _.isFunction usersTransform then transformFn else null
 
   _updateQuery: ->
-    @_stateChanged()
+    @_searchDep.changed()
     @search()
 
 # Changes search string
   search: (searchString) ->
     if searchString or searchString is ''
       @_searchConfig.searchString = searchString
-      @_stateChanged()
+      @_searchDep.changed()
 
     if @_searchConfig.searchMode is 'subscription'
       @_searchSubscribtion = @_subscriptionContext.subscribe AntiSearchSource._publisherName, @_searchConfig, @_onSubscriptionReady
@@ -56,7 +54,7 @@ class AntiSearchSourceClient
 
 # Reactive data source
   searchResult: (options = {}) ->
-    @_stateFlag.get()
+    @_searchDep.depend()
     if @_searchConfig.searchMode is 'local' or @_searchSubscribtion and @_searchSubscribtion.ready()
       query = AntiSearchSource._buildSearchQuery(@_searchConfig)
       _.extend options,
@@ -88,9 +86,10 @@ class AntiSearchSourceClient
   _escapeRegExpStr: (str) -> str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
 
   _buildSearchQuery: (configEntry) ->
+    searchStringQueries = false
     if configEntry.searchString
       escapedSearchString = @_escapeRegExpStr(configEntry.searchString)
-      $searchStringOr = configEntry.fields.map (fieldName) ->
+      searchStringQueries = configEntry.fields.map (fieldName) ->
         $orEntry = {}
         $orEntry[fieldName] = {$regex: escapedSearchString, $options: 'i'}
         return $orEntry
@@ -101,7 +100,7 @@ class AntiSearchSourceClient
       ]
     }
 
-    if _.isArray $searchStringOr then searchQuery.$and.push {$or: $searchStringOr}
+    if _.isArray searchStringQueries then searchQuery.$and.push {$or: searchStringQueries}
 
     return searchQuery
 

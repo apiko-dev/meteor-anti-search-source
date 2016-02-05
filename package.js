@@ -1,6 +1,6 @@
 Package.describe({
   name: 'jss:anti-search-source',
-  version: '0.2.4',
+  version: '0.2.5',
   summary: 'Flexible search in collections based on publish/subscribe',
   git: 'https://github.com/JSSolutions/meteor-anti-search-source',
   documentation: 'README.md'
@@ -11,7 +11,7 @@ Package.onUse(function (api) {
   api.use('templating');
   api.use('coffeescript');
   api.use('check');
-  api.use('reactive-var');
+  api.use('tracker');
   api.use('underscore');
   api.use('dburles:mongo-collection-instances@0.1.3');
 
