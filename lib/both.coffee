@@ -72,7 +72,6 @@ class AntiSearchSourceClient
       return @_searchResult
 
 @AntiSearchSource =
-  _methodName: '__makeGlobalSearch'
   _transforms: {}
   _allowRules: {}
 
