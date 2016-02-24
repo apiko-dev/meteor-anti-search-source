@@ -8,10 +8,7 @@ Flexible search in collections based on publish/subscribe
 * Searched fields transform
 * Automatic search source destroy on blaze template destroy (in case `this.AntiSearchSource.create()` was used)
 * Search in local or global mode
-
-### Current limitation
-
-* Only one search source per client
+* High security level in global mode
 
 
 ### Usage example
@@ -44,10 +41,16 @@ if (Meteor.isClient) {
     }, 1500)
   });
 }
+
+if (Meteor.isServer) {
+  AntiSearchSource.allow('persons', {
+    maxLimit: 20,
+    securityCheck (userId, configs) {
+      return !!userId;
+    },
+    allowedFields: ['name', 'email']
+  });
+}
 ```
-
-### Future work
-
-* Enable multiple collection search per client (Idea: pass array of search configs into search subscription and return array of related cursors)
 
 Made by [![Professional Meteor Development Studio](http://s30.postimg.org/jfno1g71p/jss_xs.png)](http://jssolutionsdev.com) - [Professional Meteor Development Company](http://jssolutionsdev.com)

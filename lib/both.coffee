@@ -16,6 +16,7 @@ class AntiSearchSourceClient
       console.log('Error while searching', err)
     else
       @_searchResult = res
+      @_searchDep.changed()
 
   _createTransformFn: (usersTransform) ->
     transformFn = (document) =>
@@ -39,7 +40,7 @@ class AntiSearchSourceClient
       @_searchDep.changed()
 
     if @_searchConfig.searchMode is 'global'
-      Meteor.call 'makeGlobalSearch', @_searchConfig, @_onSearchComplete
+      Meteor.call '__makeGlobalSearch', @_searchConfig, @_onSearchComplete
 
   setMongoQuery: (newMongoQuery) ->
     unless _.isEqual newMongoQuery, @_searchConfig.mongoQuery
@@ -71,8 +72,8 @@ class AntiSearchSourceClient
       return @_searchResult
 
 @AntiSearchSource =
-  _publisherName: '__antiSearchSourcePublisher'
   _transforms: {}
+  _allowRules: {}
 
   _clientProto: AntiSearchSourceClient
 
@@ -106,6 +107,9 @@ class AntiSearchSourceClient
     if _.isArray searchStringQueries then searchQuery.$and.push {$or: searchStringQueries}
 
     return searchQuery
+
+  allow: (collectionName, allowRules) ->
+    @_allowRules[collectionName] = allowRules
 
   queryTransform: (collectionName, transformCallback) ->
     @_transforms[collectionName] = transformCallback
