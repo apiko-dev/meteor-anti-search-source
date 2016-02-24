@@ -1,10 +1,10 @@
 @AntiSearchSource.allow = (collectionName, allowRules) ->
-  check currentAllowRule,
+  check allowRules,
     maxLimit: Match.Optional(Number)
     securityCheck: Match.Optional(Function)
     allowedFields: Match.Optional([String])
     queryTransform: Match.Optional(Function)
-    
+
   @_allowRules[collectionName] = allowRules
 
 
