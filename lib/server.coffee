@@ -1,4 +1,10 @@
 @AntiSearchSource.allow = (collectionName, allowRules) ->
+  check currentAllowRule,
+    maxLimit: Match.Optional(Number)
+    securityCheck: Match.Optional(Function)
+    allowedFields: Match.Optional([String])
+    queryTransform: Match.Optional(Function)
+    
   @_allowRules[collectionName] = allowRules
 
 
@@ -10,12 +16,6 @@ Meteor.methods
 
     unless currentAllowRule
       throw new Meteor.Error 404, 'No anti-search source server configuration exists'
-
-    check currentAllowRule,
-      maxLimit: Match.Optional(Number)
-      securityCheck: Match.Optional(Function)
-      allowedFields: Match.Optional([String])
-      queryTransform: Match.Optional(Function)
 
     userId = Meteor.userId()
 
