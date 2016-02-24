@@ -1,18 +1,11 @@
-Meteor.publish AntiSearchSource._publisherName, (configEntry) ->
-  check configEntry, AntiSearchSource._SearchConfig
+Meteor.methods
+  makeGlobalSearch: (configEntry) ->
+    collection = Mongo.Collection.get(configEntry.collection)
 
-  currentAllowRule = AntiSearchSource._allowRules[configEntry.collection]
-  # security check
-  if currentAllowRule
-    unless currentAllowRule.call null, @userId, configEntry
-      return
+    searchQuery = AntiSearchSource._buildSearchQuery(configEntry)
 
-  collection = Mongo.Collection.get(configEntry.collection)
+    queryTransformFn = AntiSearchSource._transforms[configEntry.collection]
+    if queryTransformFn then searchQuery = queryTransformFn(Meteor.userId, searchQuery)
 
-  searchQuery = AntiSearchSource._buildSearchQuery(configEntry)
-
-  queryTranformFn = AntiSearchSource._transforms[configEntry.collection]
-  if queryTranformFn then searchQuery = queryTranformFn(@userId, searchQuery)
-
-  cursor = collection.find searchQuery, {limit: configEntry.limit}
-  return cursor
+    return collection.find searchQuery, {limit: configEntry.limit}
+      .fetch()

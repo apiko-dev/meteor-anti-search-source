@@ -1,5 +1,5 @@
 class AntiSearchSourceClient
-  constructor: (@_searchConfig, @_subscriptionContext = Meteor) ->
+  constructor: (@_searchConfig) ->
     @_searchConfig.limit = @_searchConfig.limit || 0
 
     collection = @_searchConfig.collection
@@ -7,11 +7,15 @@ class AntiSearchSourceClient
     @_searchConfig.collection = if _.isString collection then collection else collection._name
 
     @_searchDep = new Tracker.Dependency();
-    #make dummy subscription after creating
+    #make dummy search after creating
     @search('')
 
-  _onSubscriptionReady: (err, res) ->
-    if err then console.log('Error while searching', err)
+
+  _onSearchComplete: (err, res) =>
+    if err
+      console.log('Error while searching', err)
+    else
+      @_searchResult = res
 
   _createTransformFn: (usersTransform) ->
     transformFn = (document) =>
@@ -34,8 +38,8 @@ class AntiSearchSourceClient
       @_searchConfig.searchString = searchString
       @_searchDep.changed()
 
-    if @_searchConfig.searchMode is 'subscription'
-      @_searchSubscribtion = @_subscriptionContext.subscribe AntiSearchSource._publisherName, @_searchConfig, @_onSubscriptionReady
+    if @_searchConfig.searchMode is 'global'
+      Meteor.call 'makeGlobalSearch', @_searchConfig, @_onSearchComplete
 
   setMongoQuery: (newMongoQuery) ->
     unless _.isEqual newMongoQuery, @_searchConfig.mongoQuery
@@ -55,7 +59,7 @@ class AntiSearchSourceClient
 # Reactive data source
   searchResult: (options = {}) ->
     @_searchDep.depend()
-    if @_searchConfig.searchMode is 'local' or @_searchSubscribtion and @_searchSubscribtion.ready()
+    if @_searchConfig.searchMode is 'local'
       query = AntiSearchSource._buildSearchQuery(@_searchConfig)
       _.extend options,
         limit: @_searchConfig.limit
@@ -63,13 +67,11 @@ class AntiSearchSourceClient
 
       return @_collection.find(query, options)
 
-# Cancels subscription for search data
-  destroy: () -> @_searchSubscribtion.stop()
-
+    else
+      return @_searchResult
 
 @AntiSearchSource =
   _publisherName: '__antiSearchSourcePublisher'
-  _allowRules: {}
   _transforms: {}
 
   _clientProto: AntiSearchSourceClient
@@ -80,7 +82,8 @@ class AntiSearchSourceClient
       fields: [String]
       searchString: Match.Optional(String)
       mongoQuery: Match.Optional(Object)
-      limit: Match.Optional(Number)
+      limit: Match.Optional(Number),
+      searchMode: String
     return true
 
   _escapeRegExpStr: (str) -> str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
@@ -103,9 +106,6 @@ class AntiSearchSourceClient
     if _.isArray searchStringQueries then searchQuery.$and.push {$or: searchStringQueries}
 
     return searchQuery
-
-  allow: (collectionName, allowCallback) ->
-    @_allowRules[collectionName] = allowCallback;
 
   queryTransform: (collectionName, transformCallback) ->
     @_transforms[collectionName] = transformCallback
