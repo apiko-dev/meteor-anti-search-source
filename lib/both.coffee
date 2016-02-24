@@ -72,7 +72,6 @@ class AntiSearchSourceClient
       return @_searchResult
 
 @AntiSearchSource =
-  _transforms: {}
   _allowRules: {}
 
   _clientProto: AntiSearchSourceClient
@@ -107,11 +106,5 @@ class AntiSearchSourceClient
     if _.isArray searchStringQueries then searchQuery.$and.push {$or: searchStringQueries}
 
     return searchQuery
-
-  allow: (collectionName, allowRules) ->
-    @_allowRules[collectionName] = allowRules
-
-  queryTransform: (collectionName, transformCallback) ->
-    @_transforms[collectionName] = transformCallback
 
   create: (config) -> new AntiSearchSourceClient(config)
