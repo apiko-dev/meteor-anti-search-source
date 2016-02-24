@@ -1,3 +1,7 @@
+@AntiSearchSource.allow = (collectionName, allowRules) ->
+  @_allowRules[collectionName] = allowRules
+
+
 Meteor.methods
   __makeGlobalSearch: (configEntry) ->
     check configEntry, AntiSearchSource._SearchConfig
@@ -8,27 +12,31 @@ Meteor.methods
       throw new Meteor.Error 404, 'No anti-search source server configuration exists'
 
     check currentAllowRule,
-      maxLimit: Number
-      securityCheck: Function
-      allowedFields: [String]
+      maxLimit: Match.Optional(Number)
+      securityCheck: Match.Optional(Function)
+      allowedFields: Match.Optional([String])
+      queryTransform: Match.Optional(Function)
+
+    userId = Meteor.userId()
 
     # do a security check
-    unless currentAllowRule.securityCheck.call null, Meteor.userId(), configEntry
+    if currentAllowRule.securityCheck and not currentAllowRule.securityCheck.call null, userId, configEntry
       throw new Meteor.Error 403, 'You shall not pass!'
 
     # check config limit and change it, if it is greater than maximum allowed limit
-    if not configEntry.limit or configEntry.limit > currentAllowRule.maxLimit
+    if currentAllowRule.maxLimit and (not configEntry.limit or configEntry.limit > currentAllowRule.maxLimit)
       configEntry.limit = currentAllowRule.maxLimit
 
-    # leave only allowed fields in the search fields config
-    configEntry.fields = _.intersection currentAllowRule.allowedFields, configEntry.fields
+    if currentAllowRule.allowedFields
+      # leave only allowed fields in the search fields config
+      configEntry.fields = _.intersection currentAllowRule.allowedFields, configEntry.fields
 
     collection = Mongo.Collection.get(configEntry.collection)
 
     searchQuery = AntiSearchSource._buildSearchQuery(configEntry)
 
-    queryTransformFn = AntiSearchSource._transforms[configEntry.collection]
-    if queryTransformFn then searchQuery = queryTransformFn(Meteor.userId(), searchQuery)
+    # make query transformation if needed
+    if currentAllowRule.queryTransform then searchQuery = currentAllowRule.queryTransform(userId, searchQuery)
 
     return collection.find searchQuery, {limit: configEntry.limit}
       .fetch()
