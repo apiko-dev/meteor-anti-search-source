@@ -38,5 +38,11 @@ Meteor.methods
     # make query transformation if needed
     if currentAllowRule.queryTransform then searchQuery = currentAllowRule.queryTransform(userId, searchQuery)
 
-    return collection.find searchQuery, {limit: configEntry.limit}
-      .fetch()
+    fieldsToPublish = {}
+    configEntry.fields.forEach (fieldName) ->
+      fieldsToPublish[fieldName] = 1
+
+    return collection.find searchQuery,
+      limit: configEntry.limit
+      fields: fieldsToPublish
+    .fetch()
