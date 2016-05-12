@@ -7,7 +7,7 @@ Package.describe({
 });
 
 Package.onUse(function (api) {
-  api.versionsFrom('METEOR@1.1.0.3');
+  api.versionsFrom('1.2');
   api.use('templating');
   api.use('ecmascript');
   api.use('check');
