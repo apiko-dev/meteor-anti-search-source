@@ -9,13 +9,13 @@ Package.describe({
 Package.onUse(function (api) {
   api.versionsFrom('1.2');
   api.use('templating');
-  api.use('ecmascript');
+  api.use('coffeescript');
   api.use('check');
   api.use('tracker');
   api.use('underscore');
   api.use('dburles:mongo-collection-instances@0.1.3');
 
-  api.addFiles('lib/both.js');
-  api.addFiles(['lib/client.js'], 'client');
-  api.addFiles(['lib/server.js'], 'server');
+  api.addFiles('lib/both.coffee');
+  api.addFiles(['lib/client.coffee'], 'client');
+  api.addFiles(['lib/server.coffee'], 'server');
 });
