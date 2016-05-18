@@ -9,6 +9,7 @@ Flexible search in collections based on publish/subscribe
 * Automatic search source destroy on blaze template destroy (in case `this.AntiSearchSource.create()` was used)
 * Search in local or global mode
 * High security level in global mode
+* Search in relatives collections
 
 
 ### Usage example
@@ -21,7 +22,15 @@ if (Meteor.isClient) {
     this.searchSource = this.AntiSearchSource({
       collection: 'persons',
       searchMode: 'global',
-      fields: ['name'],
+      fields: ['name', 'email', {
+          collection: 'groups',
+          referenceField: 'groupId',
+          fields: ['groupDescription']
+      }, {
+          collection: 'home',
+          referenceField: 'homeId',
+          fields: ['homeDescription','otherField']
+      }],
       mongoQuery: {
         age: {$gte: 30}
       },
