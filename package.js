@@ -1,13 +1,13 @@
 Package.describe({
   name: 'jss:anti-search-source',
-  version: '1.0.2',
+  version: '1.2.0',
   summary: 'Flexible search in collections based on publish/subscribe',
   git: 'https://github.com/JSSolutions/meteor-anti-search-source',
   documentation: 'README.md'
 });
 
 Package.onUse(function (api) {
-  api.versionsFrom('METEOR@1.1.0.3');
+  api.versionsFrom('1.2');
   api.use('templating');
   api.use('ecmascript');
   api.use('check');
