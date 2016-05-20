@@ -20,7 +20,7 @@ Persons = new Mongo.Collection('persons');
 if (Meteor.isClient) {
   Template.hello.onCreated(function () {
     this.searchSource = this.AntiSearchSource({
-      collection: 'persons',
+      collection: Persons,
       searchMode: 'global',
       fields: ['name', 'email', {
           collection: 'groups',
@@ -61,5 +61,6 @@ if (Meteor.isServer) {
   });
 }
 ```
+
 
 Made by [![Professional Meteor Development Studio](http://s30.postimg.org/jfno1g71p/jss_xs.png)](http://jssolutionsdev.com) - [Professional Meteor Development Company](http://jssolutionsdev.com)
