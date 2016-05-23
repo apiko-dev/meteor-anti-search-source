@@ -78,5 +78,9 @@ if (Meteor.isServer) {
 }
 ```
 
+### Changelog
+
+* 1.3.0 - Translated to ES6, fully refactored, added search by related documents.
+
 
 Made by [![Professional Meteor Development Studio](http://s30.postimg.org/jfno1g71p/jss_xs.png)](http://jssolutionsdev.com) - [Professional Meteor Development Company](http://jssolutionsdev.com)
