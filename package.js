@@ -1,13 +1,13 @@
 Package.describe({
   name: 'jss:anti-search-source',
-  version: '1.3.2',
+  version: '1.4.0',
   summary: 'Flexible search in collections based on publish/subscribe',
   git: 'https://github.com/JSSolutions/meteor-anti-search-source',
   documentation: 'README.md'
 });
 
 Package.onUse(function (api) {
-  api.versionsFrom('1.2');
+  api.versionsFrom('1.3');
   api.use('templating');
   api.use('ecmascript');
   api.use('check');
@@ -15,9 +15,6 @@ Package.onUse(function (api) {
   api.use('underscore');
   api.use('dburles:mongo-collection-instances@0.1.3');
 
-  api.addFiles('lib/both.js');
-  api.addFiles(['lib/client.js'], 'client');
-  api.addFiles(['lib/server.js'], 'server');
-
-  api.export(['AntiSearchSource'], 'server');
+  api.mainModule('lib/client.js', 'client');
+  api.mainModule('lib/server.js', 'server');
 });
