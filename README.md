@@ -26,7 +26,7 @@ Flexible search in collections based on publish/subscribe
 * `setMongoQuery(newMongoQuery)` - replaces Mongo query from configuration
 * `setLimit(newLimit)` - change limit;
 * `incrementLimit([increment=10])` - increase limit on `value`;
-* `isDataReady` - reactive state which shows if data is returned/
+* `isDataReady` - reactive state which shows if data is returned.
 
 ### Usage example
 
