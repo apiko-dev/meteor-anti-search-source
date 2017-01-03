@@ -78,8 +78,12 @@ if (Meteor.isServer) {
 }
 ```
 
+### Todos
+- [ ] Remove Blaze dependency
+
 ### Changelog
 
+* 1.4.3 - Fix server side sort issue.
 * 1.3.0 - Translated to ES6, fully refactored, added search by related documents.
 
 
