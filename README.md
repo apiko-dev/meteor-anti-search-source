@@ -25,8 +25,8 @@ Flexible search in collections based on publish/subscribe
 * `searchResult([options])` - return search result as Mongo.Cursor (Array for 'global' search). `options` work similarly to Meteor collection `find()`'s. Reactive data source;
 * `setMongoQuery(newMongoQuery)` - replaces Mongo query from configuration
 * `setLimit(newLimit)` - change limit;
-* `incrementLimit([increment=10])` - increase limit on `value`.
-
+* `incrementLimit([increment=10])` - increase limit on `value`;
+* `isDataReady` - reactive state which shows if data is returned.
 
 ### Usage example
 
